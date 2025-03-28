@@ -1,7 +1,7 @@
 ---
 title: "Lab 06 - Ugly charts and Simpson's paradox"
-author: "Insert your name here"
-date: "Insert date here"
+author: "Noah Booker"
+date: "3/28/25"
 output: github_document
 ---
 
@@ -9,11 +9,35 @@ output: github_document
 
 ```{r load-packages, message = FALSE}
 library(tidyverse) 
-library(dsbox)
-library(mosaicData) 
+#library(dsbox)
+#library(mosaicData) 
+```
+
+```{r}
+staff <- read_csv("data/instructional-staff.csv")
+
+staff_long <- staff %>%
+  pivot_longer(cols = -faculty_type, names_to = "year") %>%
+  mutate(value = as.numeric(value))
+
+staff_long %>%
+  ggplot(aes(x = year, y = value, color = faculty_type)) +
+  geom_line()
+
+staff_long %>%
+  ggplot(aes(
+    x = year,
+    y = value,
+    group = faculty_type,
+    color = faculty_type
+  )) +
+  geom_line()
 ```
 
 ### Exercise 1
+
+Include the line plot you made above in your report and make sure the figure width is large enough to make it legible.
+Also fix the title, axis labels, and legend label.
 
 Remove this text, and add your answer for Exercise 1 here.
 Add code chunks as needed.
