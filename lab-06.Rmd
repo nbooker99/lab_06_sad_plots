@@ -1,7 +1,7 @@
 ---
 title: "Lab 06 - Ugly charts and Simpson's paradox"
 author: "Noah Booker"
-date: "3/28/25"
+date: "3/29/25"
 output: github_document
 ---
 # Take a Sad Plot and Make It Better
@@ -68,7 +68,7 @@ The current plot seems to tell that story pretty well. The only line that shows 
 
 Solution: I had the idea of trying to make the line for Part-Time Faculty thicker than the other lines, and asked Claude.ai for a way to do this. Claude helped me to create the code below which adds in a separate geom_line layer for the dataset filtered to include just Part-Time Faculty with the linewidth set to 1.5 (instead of the default .5). I think this plot accomplishes the goal of emphasizing the growth in Part-Time Faculty.
 
-```{r plot1edited, fig.width=10, fig.height=6}
+```{r plot1_2, fig.width=10, fig.height=6}
 staff_long %>%
   ggplot(aes(
     x = year,
@@ -89,7 +89,7 @@ staff_long %>%
 
 ## Fisheries
 ### Exercise 3
-Can you help the researcher improve the data visualizations he made from the FOA data on the fisheries production of different countries? First, brainstorm how you would improve it. Then create the improved visualization and document your changes/decisions with bullet points. It’s ok if some of your improvements are aspirational, i.e. you don’t know how to implement it, but you think it’s a good idea. Implement what you can and leave notes identifying the aspirational improvements that could not be made. (You don’t need to recreate their plots in order to improve them)
+Can you help the researcher improve the data visualizations he made from the FOA data on the fisheries production of different countries? First, brainstorm how you would improve it. Then create the improved visualization and document your changes/decisions with bullet points. It’s ok if some of your improvements are aspirational, i.e. you don’t know how to implement it, but you think it’s a good idea. Implement what you can and leave notes identifying the aspirational improvements that could not be made. (You don’t need to recreate their plots in order to improve them.)
 
 ```{r fishdata}
 fisheries <- read_csv("data/fisheries.csv")
@@ -105,10 +105,101 @@ It seems to me like a reasonable primary goal with creating a visualization for 
 • Let's first get an idea of how many countries we can usefully compare. The lab description says that the visualization excludes countries with less than 100,000 tons. Let's see how many countries that leaves us with.
 
 ```{r tonnage_cutoff}
-#fisheries %>% 
-  #select(total)
+fisheries %>% 
+  filter(total >= 100000)
 ```
+
+• Making the cutoff at 100,000 tons still leaves us with a dataframe with 82 countries. That seems like too many to usefully compare. I think it seems more reasonable to compare the top ten.
+
+```{r topten}
+fisheries_top10 <- fisheries %>% 
+  arrange(desc(total)) %>% 
+  slice(1:10) #Thanks to Claude for suggesting the slice( ) function.
+```
+
 • A barplot seems to me like the most appropriate way to compare countries on their fishery production (much better than a pie chart or whatever that other graph is).
 
-```{r barplot1}
+```{r plot2}
+fisheries_top10 %>% 
+  ggplot(aes(x = country, y = total)) +
+  geom_col()
 ```
+
+• Order matters: order countries on x-axis in order of fish production.
+```{r reorder_countries}
+fisheries_top10 <- fisheries_top10 %>% 
+  mutate(
+    country = fct_relevel(
+      country,
+      "China", "Indonesia", "India", "Vietnam", "United States", 
+      "Russia", "Japan", "Philippines", "Peru", "Bangladesh"))
+```
+• Use meaningful and nonredundant labels: Improve y-axis label, remove x-axis label, add title and subtitle.
+
+• Make country labels angled for easier reading (I like this option better than coord_flip).
+
+• Fix y-axis value labels to be regular numbers, in increments of 10 million.
+```{r plot2_2}
+fisheries_top10 %>% 
+  ggplot(aes(x = country, y = total)) +
+  geom_col() +
+  labs(x = NULL, y = "Tons (Millions)", title = "Top 10 World Fisheries' Production, 2016",
+       subtitle = "Data from the Fisheries and Aquaculture Department of the FOA of the United Nations") +
+  theme_minimal() +
+  #I recycled this code for angling the x-axis value labels from the Brexit activity. (Claude helped create it.)
+  theme(
+    axis.text.x = element_text(angle = 45, hjust = 1)) +
+  #Claude helped with the code below to get the y-axis value labels how I wanted them.
+  scale_y_continuous(
+    breaks = seq(0, max(fisheries_top10$total), by = 10000000),
+    labels = function(x) x/1000000
+  )
+```
+
+• Show each country's total's composition of captured vs. farmed fish.
+
+```{r plot2_3}
+# Reshape the data from wide to long format
+fisheries_top10_long <- fisheries_top10 %>%
+  pivot_longer(cols = c(capture, aquaculture), 
+               names_to = "production_type",
+               values_to = "value")
+
+# Create the stacked bar chart
+fisheries_top10_long %>%
+  ggplot(aes(x = country, y = value, fill = production_type)) +
+  geom_col() +
+  labs(x = NULL, 
+       y = "Tons (Millions)", 
+       title = "Top 10 World Fisheries' Production, 2016",
+       subtitle = "Data from the Fisheries and Aquaculture Department of the FOA of the United Nations",
+       fill = "Production Type") +
+  theme_minimal() +
+  #Thanks Claude for helping to adjust the legend position.
+  theme(
+  axis.text.x = element_text(angle = 45, hjust = 1),
+  legend.position = "inside",
+  legend.position.inside = c(0.85, 0.85),
+  legend.background = element_rect(fill = "white", color = NA, linewidth = 0.5),
+  legend.margin = margin(6, 6, 6, 6)
+) +
+  scale_y_continuous(
+    breaks = seq(0, max(fisheries_top10$total), by = 5000000),
+    labels = function(x) x/1000000
+  ) + #Used the colors from the Brexit activity.
+  scale_fill_manual(values = c(
+    "aquaculture" = "#ef8a62",
+    "capture" = "#67a9cf"),
+labels = c(
+  "aquaculture" = "Aquaculture",
+  "capture" = "Capture"
+))
+```
+
+#### Other things I would do with more time
+
+If I had more time to spend on this lab I might do some other things.
+
+• Compare the top ten countries on their proportion of fishery production that comes from aquaculture or capture while ignoring total producton (similar to how we compared to proportion of opinions by region in the Brexit data, ignoring differences in regional sample sizes).
+
+• Create a variable that represents each countries proportion of the overall total fishery production and compare the top 10 countries. This would tell us what proportion of the world's total fishery production China, for example, accounts for. The pie charts shown in the lab module sort of do this (separately for capture and aquaculture), but a bar graph would make it easier to quantify.

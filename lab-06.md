@@ -1,7 +1,7 @@
 Lab 06 - Ugly charts and Simpson’s paradox
 ================
 Noah Booker
-3/28/25
+3/29/25
 
 # Take a Sad Plot and Make It Better
 
@@ -120,7 +120,7 @@ staff_long %>%
   theme_minimal()
 ```
 
-![](lab-06_files/figure-gfm/plot1edited-1.png)<!-- -->
+![](lab-06_files/figure-gfm/plot1_2-1.png)<!-- -->
 
 ## Fisheries
 
@@ -134,7 +134,7 @@ It’s ok if some of your improvements are aspirational, i.e. you don’t
 know how to implement it, but you think it’s a good idea. Implement what
 you can and leave notes identifying the aspirational improvements that
 could not be made. (You don’t need to recreate their plots in order to
-improve them)
+improve them.)
 
 ``` r
 fisheries <- read_csv("data/fisheries.csv")
@@ -181,10 +181,141 @@ less than 100,000 tons. Let’s see how many countries that leaves us
 with.
 
 ``` r
-#fisheries %>% 
-  #select(total)
+fisheries %>% 
+  filter(total >= 100000)
+```
+
+    ## # A tibble: 82 × 4
+    ##    country    capture aquaculture   total
+    ##    <chr>        <dbl>       <dbl>   <dbl>
+    ##  1 Angola      486490         655  487145
+    ##  2 Argentina   755226        3673  758899
+    ##  3 Australia   174629       96847  271476
+    ##  4 Bangladesh 1674770     2203554 3878324
+    ##  5 Brazil      705000      581230 1286230
+    ##  6 Cambodia    629950      172500  802450
+    ##  7 Cameroon    233190        2315  235505
+    ##  8 Canada      874727      200765 1075492
+    ##  9 Chad        110000          94  110094
+    ## 10 Chile      1829238     1050117 2879355
+    ## # ℹ 72 more rows
+
+• Making the cutoff at 100,000 tons still leaves us with a dataframe
+with 82 countries. That seems like too many to usefully compare. I think
+it seems more reasonable to compare the top ten.
+
+``` r
+fisheries_top10 <- fisheries %>% 
+  arrange(desc(total)) %>% 
+  slice(1:10) #Thanks to Claude for suggesting the slice( ) function.
 ```
 
 • A barplot seems to me like the most appropriate way to compare
 countries on their fishery production (much better than a pie chart or
 whatever that other graph is).
+
+``` r
+fisheries_top10 %>% 
+  ggplot(aes(x = country, y = total)) +
+  geom_col()
+```
+
+![](lab-06_files/figure-gfm/plot2-1.png)<!-- -->
+
+• Order matters: order countries on x-axis in order of fish production.
+
+``` r
+fisheries_top10 <- fisheries_top10 %>% 
+  mutate(
+    country = fct_relevel(
+      country,
+      "China", "Indonesia", "India", "Vietnam", "United States", 
+      "Russia", "Japan", "Philippines", "Peru", "Bangladesh"))
+```
+
+• Use meaningful and nonredundant labels: Improve y-axis label, remove
+x-axis label, add title and subtitle.
+
+• Make country labels angled for easier reading (I like this option
+better than coord_flip).
+
+• Fix y-axis value labels to be regular numbers, in increments of 10
+million.
+
+``` r
+fisheries_top10 %>% 
+  ggplot(aes(x = country, y = total)) +
+  geom_col() +
+  labs(x = NULL, y = "Tons (Millions)", title = "Top 10 World Fisheries' Production, 2016",
+       subtitle = "Data from the Fisheries and Aquaculture Department of the FOA of the United Nations") +
+  theme_minimal() +
+  #I recycled this code for angling the x-axis value labels from the Brexit activity. (Claude helped create it.)
+  theme(
+    axis.text.x = element_text(angle = 45, hjust = 1)) +
+  #Claude helped with the code below to get the y-axis value labels how I wanted them.
+  scale_y_continuous(
+    breaks = seq(0, max(fisheries_top10$total), by = 10000000),
+    labels = function(x) x/1000000
+  )
+```
+
+![](lab-06_files/figure-gfm/plot2_2-1.png)<!-- -->
+
+• Show each country’s total’s composition of captured vs. farmed fish.
+
+``` r
+# Reshape the data from wide to long format
+fisheries_top10_long <- fisheries_top10 %>%
+  pivot_longer(cols = c(capture, aquaculture), 
+               names_to = "production_type",
+               values_to = "value")
+
+# Create the stacked bar chart
+fisheries_top10_long %>%
+  ggplot(aes(x = country, y = value, fill = production_type)) +
+  geom_col() +
+  labs(x = NULL, 
+       y = "Tons (Millions)", 
+       title = "Top 10 World Fisheries' Production, 2016",
+       subtitle = "Data from the Fisheries and Aquaculture Department of the FOA of the United Nations",
+       fill = "Production Type") +
+  theme_minimal() +
+  #Thanks Claude for helping to adjust the legend position.
+  theme(
+  axis.text.x = element_text(angle = 45, hjust = 1),
+  legend.position = "inside",
+  legend.position.inside = c(0.85, 0.85),
+  legend.background = element_rect(fill = "white", color = NA, linewidth = 0.5),
+  legend.margin = margin(6, 6, 6, 6)
+) +
+  scale_y_continuous(
+    breaks = seq(0, max(fisheries_top10$total), by = 5000000),
+    labels = function(x) x/1000000
+  ) + #Used the colors from the Brexit activity.
+  scale_fill_manual(values = c(
+    "aquaculture" = "#ef8a62",
+    "capture" = "#67a9cf"),
+labels = c(
+  "aquaculture" = "Aquaculture",
+  "capture" = "Capture"
+))
+```
+
+![](lab-06_files/figure-gfm/plot2_3-1.png)<!-- -->
+
+#### Other things I would do with more time
+
+If I had more time to spend on this lab I might do some other things.
+
+• Compare the top ten countries on their proportion of fishery
+production that comes from aquaculture or capture while ignoring total
+producton (similar to how we compared to proportion of opinions by
+region in the Brexit data, ignoring differences in regional sample
+sizes).
+
+• Create a variable that represents each countries proportion of the
+overall total fishery production and compare the top 10 countries. This
+would tell us what proportion of the world’s total fishery production
+China, for example, accounts for. The pie charts shown in the lab module
+sort of do this (separately for capture and aquaculture), but a bar
+graph would make it easier to quantify.
