@@ -63,7 +63,7 @@ Suppose the objective of this plot was to show that the proportion of part-time 
 
 The current plot seems to tell that story pretty well. The only line that shows a consistent positive slope over the years is Part-Time Faculty. But perhaps I'm overlooking some changes that could make that fact more obvious...
 
-Solution: I had the idea of trying to make the line for Part-Time Faculty thicker than the other lines, and asked Claude.ai for a way to do this. Claude helped me to create the code below which adds in a separate geom_line layer for the dataset filtered to include just Part-Time Faculty with the linewidth set to 1.5 (instead of the default .5).
+Solution: I had the idea of trying to make the line for Part-Time Faculty thicker than the other lines, and asked Claude.ai for a way to do this. Claude helped me to create the code below which adds in a separate geom_line layer for the dataset filtered to include just Part-Time Faculty with the linewidth set to 1.5 (instead of the default .5). I think this plot accomplishes the goal of emphasizing the growth in Part-Time Faculty.
 
 ```{r plot1edited, fig.width=10, fig.height=6}
 staff_long %>%

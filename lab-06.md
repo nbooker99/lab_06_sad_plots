@@ -94,7 +94,8 @@ Faculty thicker than the other lines, and asked Claude.ai for a way to
 do this. Claude helped me to create the code below which adds in a
 separate geom_line layer for the dataset filtered to include just
 Part-Time Faculty with the linewidth set to 1.5 (instead of the default
-.5).
+.5). I think this plot accomplishes the goal of emphasizing the growth
+in Part-Time Faculty.
 
 ``` r
 staff_long %>%
