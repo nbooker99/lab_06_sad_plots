@@ -127,15 +127,14 @@ staff_long %>%
 ### Exercise 3
 
 Can you help the researcher improve the data visualizations he made from
-the Fisheries and Aquaculture Department of the Food and Agriculture
-Organization of the United Nations’ (FAO) data on the fisheries
-production of different countries? First, brainstorm how you would
-improve it. Then create the improved visualization and document your
-changes/decisions with bullet points. It’s ok if some of your
-improvements are aspirational, i.e. you don’t know how to implement it,
-but you think it’s a good idea. Implement what you can and leave notes
-identifying the aspirational improvements that could not be made. (You
-don’t need to recreate their plots in order to improve them)
+the FOA data on the fisheries production of different countries? First,
+brainstorm how you would improve it. Then create the improved
+visualization and document your changes/decisions with bullet points.
+It’s ok if some of your improvements are aspirational, i.e. you don’t
+know how to implement it, but you think it’s a good idea. Implement what
+you can and leave notes identifying the aspirational improvements that
+could not be made. (You don’t need to recreate their plots in order to
+improve them)
 
 ``` r
 fisheries <- read_csv("data/fisheries.csv")
@@ -150,6 +149,42 @@ fisheries <- read_csv("data/fisheries.csv")
     ## ℹ Use `spec()` to retrieve the full column specification for this data.
     ## ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
 
-• I have no clue what I’m looking at with the first graph——the one with
+#### Brainstorm
+
+I have no clue what I’m looking at with the first graph——the one with
 countries on the x-axis and (what I only know from your description to
-be) total harvest on the y-axis (there are no anxis labels).
+be) total harvest on the y-axis (there are no anxis labels). There’s a
+blue curve and a red curve that both skyrocket on the left side (which
+I’m assuming shows that China has a lot of harvest since they’re the
+first contry on the x-axis). But then there’s little peaks as you move
+righward along the curves, but the peaks don’t seem to correspond to
+where the other countries are located on the x-axis. So, I have no clue.
+The other two visualizations are 3D pie charts, one showing each
+country’s proportion of the total capture tonnage, and the other showing
+each country’s proportion of the total aquaculture tonnage. I learned
+from Module 5 that bar charts are bad and 3D is bad. The description in
+the lab says that the visualization excludes countries with less than
+100,000 tons. This is probably a good call since there are 216 countries
+in the dataset. It seems to me like a reasonable primary goal with
+creating a visualization for this data is to be able to compare
+countries’ total tonnage of fish. Second, in visualizing tonnage of fish
+by country, we might also want to display how much of each country’s
+total tonnage came from capture or aquaculture. Third, ignoring total
+tonnage, we may be interested in comparing each country by the
+proportion of their fish which came from capture or aquaculture.
+
+#### Improved Visualization
+
+• Let’s first get an idea of how many countries we can usefully compare.
+The lab description says that the visualization excludes countries with
+less than 100,000 tons. Let’s see how many countries that leaves us
+with.
+
+``` r
+#fisheries %>% 
+  #select(total)
+```
+
+• A barplot seems to me like the most appropriate way to compare
+countries on their fishery production (much better than a pie chart or
+whatever that other graph is).
