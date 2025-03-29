@@ -3,6 +3,10 @@ Lab 06 - Ugly charts and Simpson’s paradox
 Noah Booker
 3/28/25
 
+# Take a Sad Plot and Make It Better
+
+## Instructional staff employment trends
+
 ### Load packages and data
 
 ``` r
@@ -116,13 +120,36 @@ staff_long %>%
   theme_minimal()
 ```
 
-![](lab-06_files/figure-gfm/plot1edited-1.png)<!-- --> Remove this text,
-and add your answer for Exercise 1 here. Add code chunks as needed.
-Don’t forget to label your code chunk. Do not use spaces in code chunk
-labels.
+![](lab-06_files/figure-gfm/plot1edited-1.png)<!-- -->
+
+## Fisheries
 
 ### Exercise 3
 
-…
+Can you help the researcher improve the data visualizations he made from
+the Fisheries and Aquaculture Department of the Food and Agriculture
+Organization of the United Nations’ (FAO) data on the fisheries
+production of different countries? First, brainstorm how you would
+improve it. Then create the improved visualization and document your
+changes/decisions with bullet points. It’s ok if some of your
+improvements are aspirational, i.e. you don’t know how to implement it,
+but you think it’s a good idea. Implement what you can and leave notes
+identifying the aspirational improvements that could not be made. (You
+don’t need to recreate their plots in order to improve them)
 
-Add exercise headings as needed.
+``` r
+fisheries <- read_csv("data/fisheries.csv")
+```
+
+    ## Rows: 216 Columns: 4
+    ## ── Column specification ────────────────────────────────────────────────────────
+    ## Delimiter: ","
+    ## chr (1): country
+    ## dbl (3): capture, aquaculture, total
+    ## 
+    ## ℹ Use `spec()` to retrieve the full column specification for this data.
+    ## ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
+
+• I have no clue what I’m looking at with the first graph——the one with
+countries on the x-axis and (what I only know from your description to
+be) total harvest on the y-axis (there are no anxis labels).
